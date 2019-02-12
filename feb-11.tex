@@ -1,78 +1,74 @@
 \input{config/document-setup}
 
 \begin{document}
-\lecture{Lecture Notes}{February 11, 2019}{Dev Dabke}
+\lecture{Class Discussion Notes}{February 11, 2019}{Dev Dabke}
 
-Discuss two papers today.
+\section{Overview}\label{feb-11:overview}
+On this day, we primarily discussed the paper \textit{A View from Berkeley}\cite{Asanovic:EECS-2006-183} (though we also read \textit{Classical Iterative Methods for Systems of Linear Equations} from \textit{Parallel and Distributed Computation: Numerical Methods}\cite{Bertsekas:1989:PDC:59912}, but did not have time to discuss it).
 
-\section{A View From Berkeley}
-DW: What is this paper about?
-Everything about paralle computing
+\section{A View from Berkeley}\label{feb-11:a-view}
+\subsection{Paper Overview}\label{feb-11:a-view:overview}
+According to our class, this paper is about
+\begin{itemize}
+    \item Everything about parallel computing
+    \item The state of the art and how we should transform the field
+\end{itemize}
+This paper is authored by various researchers and scientists from various fields.
+They are mostly faculty or senior research scientists at the UC Berkeley (at the time, Krste was moving from MIT to UCB).
+\\ \\
+Additionally, we determined that, stylistically, this paper:
+\begin{itemize}
+    \item Is a summary of these researchers' discussions on parallel computing
+    \item A technical report
+    \item A position paper
+    \item Tried to lay down a roadmap of how they expect people should develop parallel programs, systems, and architectures
+    \item Has a lot of strong positions
+    \item Has positions based on reasoning, rather than empirical evidence (e.g.\ the argument that we should go from multicore to manycore)
+\end{itemize}
 
-DW: other opinions?
-G: start of the art and how we should transform the field
+\subsection{Primary Contribution}\label{feb-11:a-view:contribution}
+Some ideas for this paper's primary contribution were:
+\begin{itemize}
+    \item Setting standards for evaluating parallel computing
+    \item Providing guidelines for parallel computing
+    \item The new conventional wisdoms
+    \item The dwarfs (i.e.\ high-level abstraction over measuring performance for parallel computing)
+    \item % TODO: add what [Dev] said
+    \item % TODO: add what [?] said
+    \item Though it has many contributions, it provides the most comprehensive synthesis and analysis of the best available information at the time
+\end{itemize}
 
-DW: who are the authors of this paper?
-scientists from various fields
+\subsection{Key Insights}\label{feb-11:a-view:insights}
 
-DW: are these researchers / grad students?
-These are all faculty or senior research scientists are UCB (Krste moving from MIT to UCB)
-
-DW: is this a research paper?
-Summary of the discussion?
-Technical report
-DW: tech report can be anything
-DW: is this trying to just let us know what's going on
-It's trying to lay a roadmap of how they expect people should develop things
-DW: is this a position paper?
-Greg: def not a roadmap
-Sam: could be a position paper because a lot of strong opinions
-
-Sam: some of the statements, like we should go from multicore to manycore is based on reasoning, rather than empirical data
-
-DW: closer to position paper (trying to push a view onto us, lit. a ``view'' from UCB)
-
-DW: primary contribution
-Peter: set some standards for evaluating parallel computing
-?: guideline
-DW: cw or conclusion
-?: divided into many parts and each part has their own contribution
-
-% TODO
-DD: -----
-?: -----
-
-Greg: many contribution, best anaylsis of avaiable informaiton at the time
-
-DW: what are the key insights, let's enumerate them
-?: what aspects should I consider
+We also enumerated what some of the key insights were
 \begin{enumerate}
-    \item ??: many core will beat multi core (what is multicore vs. many core; multicore is > 1 core, manycore is)
-    \item DW: dwarves
-    \item DW: conventional wisdom
-    \item DW: potpourri of considerations (autotuners, architectural suggestions)
-    \item DW: smaller/simpler is better, for parallelism it doesn't really help to have deep pipelines; Intel tejas processor (internally Pentium 8), power wall; scaled back because of power considerations
+    \item Manycore will beat multicore
+    \item The dwarfs (i.e.\ high-level abstraction over measuring performance for parallel computing)
+    \item The new conventional wisdoms
+    \item The potpourri of ancillary considerations (autotuners, architectural suggestions)
+    \item That smaller/simpler is better: deep pipelines don't help parallelism (e.g.\ Intel Tejas processor, internally the Pentium 8, hit the \textit{power wall} and was scaled back because of power considerations)
 \end{enumerate}
 
-Compare many core vs multicore
+\subsection{Manycore vs.\ Multcore}\label{feb-11:a-view:many-vs-multi}
+As an aside, we also discussed the difference between manycore and multicore, since these terms were used, but not explicitly defined, in the paper.
 
-multicore
-\begin{enumerate}
-    \item Bus
-    \item < 10
-    \item DW: designed using processor for uniprocessor systems that you connect together
-    \item [Diagram 1]
-\end{enumerate}
+\rowcolors{2}{gray!25}{white}
+\begin{center}
+    \begin{tabular}{p{7cm} p{7cm}}
+        \toprule
+        Manycore & Multicore \\
+        \midrule
+        Bus & No C \\
+        \( <10 \) cores & \( >10 \) cores \\
+        Designed using processor for uniprocessor systems that you connect together & Designed from the ground up to handle a large number of cores; other things you add into the system that facilitate parallel computing \\
+        \bottomrule
+    \end{tabular}
+\end{center}
 
-manycore
-\begin{enumerate}
-    \item No C
-    \item > 10
-    \item DW: designed from the ground up to handle a large number of cores; other things you add into the system that facilitate parallel computing
-\end{enumerate}
+\subsection{Like and Dislike}\label{feb-11:a-view:like-dislike}
+We also discussed what everyone liked and disliked about this paper:
 
-DW: what did people like and dislike?
-\begin{enumerate}
+\begin{itemize}
     \item Sam: part about the conventional wisdom, some of the changes in how people viewed computer systems; decent amount of technical expertise required; a little lost (?); DW: look across the list and see people who things across the board (arch, supercomputing, autotuners, algo, etc.)
     \item Peter: like different tensions in different places, software: visibility/opacity (even before mobile computing); DW: before the iPhone; didn't like how vauge they were about some of the programming stuff, like human factors in productivity; DW: if you do human factors research, you'll get better programming languages (?)
     \item Gaurav: ?
@@ -83,40 +79,50 @@ DW: what did people like and dislike?
     \item DD: % TODO: fill out
         DW: they push their own research agendas; points that correspond to each faculty member
     \item Greg: like that the paper is systematic, enumerations, etc.; dwarfs are a huge approach to try to summarize computational patterns; don't agree that they push their research agendas; they have to propose something, so their ideas are good to consider; provide jumping off point
-\end{enumerate}
+\end{itemize}
 
-Jump into the meat of the paper:
-Goes through conventional wisdoms
-View of GGB from UCB, trying to give something to every researcher
+\subsection{Conventional Wisdom}\label{feb-11:a-view:conventional}
+In some sense, this paper, in its view of the Golden Gate Bridge from UC Berkeley, is trying to give something to every researcher.
+This paper thus introduces some ``conventional wisdom.''
+We discuss how this ``wisdom'' has or has not held up, and if it was even true at the time.
 
-CW: agree/disagree
 \begin{enumerate}
-    \item not really true, power vs. transistor cost
-    Greg: now everything is expensive
-    Sam: Moore's Law Wall
-    \item not really true, dynamic/static leakage, engineering fixed static energy problem
-    \item true, errors: errors def got worst
-    \item true, constraints as you shrink feature size become more important
-    \item not really true, RAMP never really took off
-    \item kinda true, starting to see problems with bandwidth, but still going up
-    \item old CW not even true then; Memory wall is still a problem
+    \item not really true: power vs.\ transistor cost; now everything is expensive and we've hit the Moore's Law Wall
+    \item not really true, as good engineering fixed static energy problem
+    \item true: errors def got worst
+    \item true: constraints become more important as you shrink feature size
+    \item not really true: RAMP never really took off
+    \item kinda true: starting to see problems with bandwidth, but still going up
+    \item old CW not even true then: Memory wall is still a problem
     \item true
     \item true
     \item true
     \item true
-    \item true for some applications, but maybe not without constraints
+    \item true for some applications
 \end{enumerate}
 
-DW: what is a dwarf?
-Peter: better word ``kernel''
+\subsection{The Dwarfs}\label{feb-11:a-view:dwarfs}
 
-DW: what is a benchmark?
-??: testing program
+This paper also introduces a notion of \textit{dwarfs}.
+Although this paper is not the first to use this terminology, they co-opted and extended it for the purposes of parallel computing.
+\\ \\
+We postulated a few definitions for a dwarf:
+\begin{itemize}
+    \item better word ``kernel''
+    \item a testing program
+    \item a benchmark
+    \item an application domain
+\end{itemize}
 
-DW: FFT is a kernel, is that a dwarf?
-Benchmark: actual program you run
-Kernel: an algo/program
-Dwarf: more general
+We converged on these distinctions:
+\begin{enumerate}
+    \item A \textit{dwarf} is a general application domain that is not actionable, e.g.\ Spectral Methods
+    \item A \textit{kernel} is a specific problem or algorithm within a dwarf, e.g.\ FFT
+    \item A \textit{benchmark} is a specific implementation of a kernel, e.g.\ a specific program that runs FFT
+\end{enumerate}
+
+We also debated if dwarfs were useful.
+
 % TODO: -- Dev comment on utility of dwarfs
 Peter: if I were to implement a kernel, I would track a dwarf to give a general gist of perf for a dwarf
 % TODO: -- Dev comment on dwarfs
@@ -136,5 +142,8 @@ DW: let's walk through a few of the dwarfs; is this all of the applications?; th
     \item Unstructured grids, graph computations
     \item Monte Carlo, clump all embarrassingly parallel; DW: wouldn't necessary glom all embarrassingly parallel models into Monte Carlo
 \end{enumerate}
+
+\bibliography{citation}{}
+\bibliographystyle{alpha}
 
 \end{document}
