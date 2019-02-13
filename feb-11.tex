@@ -1,20 +1,20 @@
 \input{config/document-setup}
 
 \begin{document}
-\lecture{Class Discussion Notes}{February 11, 2019}{Dev Dabke}
+\lecture{Class Discussion Notes}{February 11, 2019}{Dev Dabke, Samuel Hsia}
 
 \section{Overview}\label{feb-11:overview}
-On this day, we primarily discussed the paper \textit{A View from Berkeley}\cite{Asanovic:EECS-2006-183} (though we also read \textit{Classical Iterative Methods for Systems of Linear Equations} from \textit{Parallel and Distributed Computation: Numerical Methods}\cite{Bertsekas:1989:PDC:59912}, but did not have time to discuss it).
+On this day, we primarily discussed the paper \textit{A View from Berkeley}\cite{Asanovic:EECS-2006-183} (though we also read \textit{Classical Iterative Methods for Systems of Linear Equations} from \textit{Parallel and Distributed Computation: Numerical Methods}\cite{Bertsekas:1989:PDC:59912}, this paper will be discussed at a future date).
 
 \section{A View from Berkeley}\label{feb-11:a-view}
 \subsection{Paper Overview}\label{feb-11:a-view:overview}
 According to our class, this paper is about
 \begin{itemize}
     \item Everything about parallel computing
-    \item The state of the art and how we should transform the field
+    \item The state of the art (in 2006) and how we should transform the field
 \end{itemize}
-This paper is authored by various researchers and scientists from various fields.
-They are mostly faculty or senior research scientists at the UC Berkeley (at the time, Krste was moving from MIT to UCB).
+This paper is authored by researchers and scientists from various fields (e.g. computer architecture, scientific computing, etc).
+They are mostly faculty or senior research scientists at the UC Berkeley (at the time, Krste Asanovic was moving from MIT to UCB).
 \\ \\
 Additionally, we determined that, stylistically, this paper:
 \begin{itemize}
@@ -23,19 +23,18 @@ Additionally, we determined that, stylistically, this paper:
     \item A position paper
     \item Tried to lay down a roadmap of how they expect people should develop parallel programs, systems, and architectures
     \item Has a lot of strong positions
-    \item Has positions based on reasoning, rather than empirical evidence (e.g.\ the argument that we should go from multicore to manycore)
+    \item Has positions based on reasoning, rather than empirical evidence (e.g.\ the argument a move from multicore to manycore is necessary)
 \end{itemize}
 
 \subsection{Primary Contribution}\label{feb-11:a-view:contribution}
 Some ideas for this paper's primary contribution were:
 \begin{itemize}
     \item Setting standards for evaluating parallel computing
-    \item Providing guidelines for parallel computing
+    \item Providing guidelines for designing parallel computing systems
     \item The new conventional wisdoms
     \item The dwarfs (i.e.\ high-level abstraction over measuring performance for parallel computing)
-    \item % TODO: add what [Dev] said
-    \item % TODO: add what [?] said
-    \item Though it has many contributions, it provides the most comprehensive synthesis and analysis of the best available information at the time
+    \item The potential benefits of a human-centric approach for designing future parallel computing systems (i.e. systems in which the exposed software has a lot more potential for performance gains).
+    \item Though it has many contributions, this paper provides the most comprehensive synthesis and analysis of the best available relevant information at the time
 \end{itemize}
 
 \subsection{Key Insights}\label{feb-11:a-view:insights}
@@ -46,39 +45,55 @@ We also enumerated what some of the key insights were
     \item The dwarfs (i.e.\ high-level abstraction over measuring performance for parallel computing)
     \item The new conventional wisdoms
     \item The potpourri of ancillary considerations (autotuners, architectural suggestions)
-    \item That smaller/simpler is better: deep pipelines don't help parallelism (e.g.\ Intel Tejas processor, internally the Pentium 8, hit the \textit{power wall} and was scaled back because of power considerations)
+    \item That smaller/simpler is better: deep pipelines don't help parallelism (e.g.\ Intel Tejas processor, internally the Pentium 8, hit the \textit{power wall} and was cancelled because of power considerations) \cite{Tejas}.
 \end{enumerate}
 
 \subsection{Manycore vs.\ Multcore}\label{feb-11:a-view:many-vs-multi}
-As an aside, we also discussed the difference between manycore and multicore, since these terms were used, but not explicitly defined, in the paper.
+As an aside, we also discussed the difference between manycore and multicore, since these terms were used, but not explicitly defined, in the paper. The following table summarizes some of the more notable characteristics for manycore and multicore computer systems.
 
 \rowcolors{2}{gray!25}{white}
 \begin{center}
-    \begin{tabular}{p{7cm} p{7cm}}
+    \begin{tabular}{p{5cm} | p{5cm} p{5cm}}
         \toprule
-        Manycore & Multicore \\
+        & Manycore & Multicore \\
         \midrule
-        Bus & No C \\
-        \( <10 \) cores & \( >10 \) cores \\
-        Designed using processor for uniprocessor systems that you connect together & Designed from the ground up to handle a large number of cores; other things you add into the system that facilitate parallel computing \\
+        Interconnect Network & Bus & No C \\
+        \# of Cores & \( <10 \) & \( >10 \) \\
+        Design Methodology & Uses uniprocessors as building blocks & Designed from the ground up to handle a large number of cores (up to 1000s range); contains other things you add into the system that facilitate parallel computing \\
         \bottomrule
     \end{tabular}
 \end{center}
 
 \subsection{Like and Dislike}\label{feb-11:a-view:like-dislike}
 We also discussed what everyone liked and disliked about this paper:
+\\ \\
+\textbf{Likes:}
 
 \begin{itemize}
-    \item Sam: part about the conventional wisdom, some of the changes in how people viewed computer systems; decent amount of technical expertise required; a little lost (?); DW: look across the list and see people who things across the board (arch, supercomputing, autotuners, algo, etc.)
-    \item Peter: like different tensions in different places, software: visibility/opacity (even before mobile computing); DW: before the iPhone; didn't like how vauge they were about some of the programming stuff, like human factors in productivity; DW: if you do human factors research, you'll get better programming languages (?)
-    \item Gaurav: ?
-    \item ???: they didn't say better arch is better; only if programmers can exploit it is it useful; DW: we should make our arch.es human focussed; ???: we should make it so we can exploit the parallelism; ???: dislike that they don't leave room for conversation; DW: this paper is very opinionated
-    \item ?: very comprehensive, so great to see parts that I should consider when designing something; dislike that there's unstated assumption, probably like still using silicon; DW: manycore was drastically different; ?: doesn't discuss drasticaly drastically different
-    \item ??: like that they provide a global view on what should be solved in parallel computing systems because they have experts in many different fields; we can understand how the different parts interact with each other; dislike how optimistic/pessimistic about certain things; no one uses 1000s of cores; DW: how many cores does your GPU have?; DW: their dwarves are not general/retail computing, not constrained to traditional desktop workloads; ??: was GPU under development?; DW: they talk about something called cg, predated cuda (general purpose GPUs); GPGPUs, GPUs in cg that Microsoft came up with (no control flow, to do vertex shading, textures, etc.); predates cuda, ML, etc.; rocket scientists / supercomputing people were using this; ??: manycore already built and commercialized; DW: GPGPUs had 10ish cores, etc.
-    \item ?!: like that there's a summary of applications, difficulty of extending Moore's Law, but provide way to specialize on certain applications; you have to gain perf from somewhere, where are we really getting the perf?; DW: the paper is actively not discussing specialization; ?!: if you put our benchmarks, people will start to specialize on the benchmarks; DW: does this paper talk about HLS, etc., for applications? ?!: talks more about parallelization; DW: main goal is to talk about parallelization; dislike: not much, perhaps missing certain computing applications?
-    \item DD: % TODO: fill out
-        DW: they push their own research agendas; points that correspond to each faculty member
-    \item Greg: like that the paper is systematic, enumerations, etc.; dwarfs are a huge approach to try to summarize computational patterns; don't agree that they push their research agendas; they have to propose something, so their ideas are good to consider; provide jumping off point
+    \item High level update of conventional wisdoms - i.e. the changes in how people viewed computer systems; 
+    \item Tensions between embedded (even predates the first iPhone, which was released in 2007) and HPC
+    \item How architecture improvements should be exposed to software system developers in order to realize full potential of parallelism
+     \item Very comprehensive - great to see parts (i.e. suggestions and possible solutions) that computer systems engineers should consider during the design process.
+     \item High level view on what should be solved in parallel computing systems and understanding how the different fields interact with each other
+      \item Systematic organization
+      \item Dwarfs are a huge approach to try to summarize computational patterns and also help us in our design process
+      \item Don't agree that they push their research agendas - they have to propose something. Their ideas can be used as starting points/suggestions for future designs.
+\end{itemize}
+
+\noindent \textbf{Dislikes:}
+
+\begin{itemize}
+    \item Decent amount of technical expertise required to appreciate the paper - as seen in the list of authors (experts in computer architecture, supercomputing, compilers, algorithms, etc.)
+    \item General vagueness in the discussion on human factors in productivity (i.e. "research in human factors research leads to higher productivity")
+    \item Paper is very opinionated and leaves little room for discussion
+    \item Unstated assumptions (i.e. Silicon dominance)
+    \item Drastic differences in how we perceive manycores then and now. 
+    \item Missclassification of GPUs: While our general purpose computers do not have cores that scale into the thousands range, we now consider GPUs to be a form of manycore processors (multiple shader processing units). Interestingly, this papertalks about Cg, which predates CUDA (used by rocket scientists/ supercomputing people).
+    \item Optimism/pessimism about certain things
+    \item The paper is actively not discussing specialization - more on parallelization.
+    \item Lots of stating general computer architecture design guidelines without explanation.
+    \item Pushing of own research agendas
+    
 \end{itemize}
 
 \subsection{Conventional Wisdom}\label{feb-11:a-view:conventional}
@@ -87,18 +102,18 @@ This paper thus introduces some ``conventional wisdom.''
 We discuss how this ``wisdom'' has or has not held up, and if it was even true at the time.
 
 \begin{enumerate}
-    \item not really true: power vs.\ transistor cost; now everything is expensive and we've hit the Moore's Law Wall
-    \item not really true, as good engineering fixed static energy problem
-    \item true: errors def got worst
-    \item true: constraints become more important as you shrink feature size
-    \item not really true: RAMP never really took off
-    \item kinda true: starting to see problems with bandwidth, but still going up
-    \item old CW not even true then: Memory wall is still a problem
-    \item true
-    \item true
-    \item true
-    \item true
-    \item true for some applications
+    \item Not true: Power Wall. Transistors are no longer really "free" - we are sort of stuck at 7nm without significant device innovations that can save the day.
+    \item Not true: Leakage solved by device innovations (i.e. FinFET)
+    \item True: errors definitely got worse
+    \item True: constraints become more important as you shrink feature size
+    \item Not really true: RAMP never really took off. However, more sophisticated FPGAs have allowed for an alternative test platform
+    \item Kind of true: starting to see problems with bandwidth, but latency is still an issue
+    \item old CW not even true then: Memory Wall is still a problem
+    \item True
+    \item True
+    \item True
+    \item True
+    \item True for some applications but less so - more emphasis on other costs
 \end{enumerate}
 
 \subsection{The Dwarfs}\label{feb-11:a-view:dwarfs}
@@ -108,7 +123,7 @@ Although this paper is not the first to use this terminology, they co-opted and 
 \\ \\
 We postulated a few definitions for a dwarf:
 \begin{itemize}
-    \item better word ``kernel''
+    \item better word: ``kernel''
     \item a testing program
     \item a benchmark
     \item an application domain
@@ -121,27 +136,32 @@ We converged on these distinctions:
     \item A \textit{benchmark} is a specific implementation of a kernel, e.g.\ a specific program that runs FFT
 \end{enumerate}
 
-We also debated if dwarfs were useful.
+We also debated if dwarfs were useful:
 
-% TODO: -- Dev comment on utility of dwarfs
-Peter: if I were to implement a kernel, I would track a dwarf to give a general gist of perf for a dwarf
-% TODO: -- Dev comment on dwarfs
-Sam: fair to say that Dwarfs are not actionable, but kernels or benchmarks?
-Sam: what's the main drawback?
-DW: we can't compare
-Gaurav: doesn't make sense to compare across dwarfs
-DW: how do I compare my GPU against a manycore?; interesting viewpoint that they took; decent cut through different application spaces that are roughly important; talk about Intel benchmark suite and how that maps onto the dwarfs; but the argument here is that none of this is actionable or useful
+While dwarfs lack the specificity of kernels and benchmarks, they can often be used as a guiding direction for designing systems for applications dominated by a single or set of kernels. Understanding the dwarves can also help us create better benchmarks: if I were to implement a benchmark, I would track a dwarf to get a general gist of its performance requirements.
 
-DW: let's walk through a few of the dwarfs; is this all of the applications?; they added 3 more dwarfs
+However, it's important to note that whereas kernels and benchmarks are actionable, dwarfs are not. This leads to the major drawback of inability for comparison (i.e. how do you compare a GPU against a manycore?).
+
+There was also a discussion on the conciseness of the list of dwarves and we generally agreed that the "Monte-Carlo" dwarf and some of the ones added later on were either too general or too problem-specific.
+
+\subsubsection{Usefulness/Communication patterns of Dwarfs}
+
 \begin{enumerate}
-    \item Dense LA probably useful; we will talk about communication patterns; think about how much parallelism exists in the application; mapping to topologies, but you can't map all small neighborhoods next to each other
-    \item Sparse LA, localization, but further communication as well
-    \item Spectral, FFT, real/complex-valued, etc.; communication from everybody to everybody; not as bad as \( n \)-body, as there is some structure [Diagram 2]
-    \item \( n \)-body problem; if we zoom in on this communication pattern, but we don't see that everything communicates, so we approximate \( n \)-body with neighborhoods; good approx for some things, but not for other things
-    \item Structured grids, some PDE solvers
-    \item Unstructured grids, graph computations
-    \item Monte Carlo, clump all embarrassingly parallel; DW: wouldn't necessary glom all embarrassingly parallel models into Monte Carlo
+    \item Dense LA: probably useful; while can't map all small neighborhoods next to each other the communication pattern is generally localized
+    \item Sparse LA: localization, but further communication as well
+    \item Spectra Methods (i.e. FFT, real/complex-valued); communication from everybody to everybody; not as bad as \( n \)-body, as there is some structure (Figure \ref{fig:butterfly}).
+    \item \( n \)-body problem: if we zoom in on this communication pattern, we don't see that everything communicates. The communication patterin is an approximated \( n \)-body with neighborhoods; good approximation for certain applications, but not for others.
+    \item Structured Grids: some PDE solvers
+    \item Unstructured Grids: graph computations
+    \item Monte Carlo (clumped with other embarrassingly parallel applications - probably not the best idea)
 \end{enumerate}
+
+\begin{figure}
+    \centering
+    \includegraphics[width = 0.8\linewidth]{butterfly}
+    \caption{Butterfly diagram for an eight-point FFT (total 12 multiplications) \cite{DSP_Tan}}
+    \label{fig:butterfly}
+\end{figure}
 
 \bibliography{citation}{}
 \bibliographystyle{alpha}
