@@ -1,0 +1,224 @@
+\input{config/document-setup}
+
+\begin{document}
+\lecture{Class Discussion Notes}{February 13, 2019}{Dev Dabke}
+
+\section{A View from Berkeley}
+DW: Discuss conclusions, did people learn something new? End of the paper?
+What was the conclusion of the paper?
+Did we like the end?
+Some autotuners were thrown in for good luck?
+
+DW: If we go into the conclusion section.
+The conclusion just rambles a little bit.
+The weakest conclusion ever.
+Terrible conclusion!
+Conclusions should be concise and to the point, and this is not that.
+
+Anything else?
+Greg: can we talk about autotuners?
+
+DW: what is an autotuner?
+DW: an autotuner is a piece of software that has an optimization algorithm that looks at how code is running and then somehow modifies the code based on some optimization criterion.
+It could just be changing parameters.
+e.g.\ if you have the blocking size of an algorithm or some other parameter (outer loop vs. inner loop parallelism) that you want to optimize, but you change parameters as you run
+Greg: not used widely?
+DW: it depends. If you're doing supercomputing with dense matrix codes, a lot of the libraries that people use under the hood use that.
+FFTW is by definition an autotuner.
+It subsumes all implementions of FFT within it.
+At run time, it tests the arch and tune the algo dynamically to the running code.
+BLAS is something similar what they're doing these days what the supercomputing stuff people use.
+LINPACK
+
+Some autotuner optimize for arch, some optimize for dunamic events going on in the system.
+
+DW: any other things that came up that you didn't know what they were?
+Peter: how do virtual machines connect to parallel computing?
+DW: it doesn't connect at all. Probably some random research thing that someone threw in for one of the professors.
+DW: talking about RAMP is a non-sequitur.
+``Academics shouldn't build chips'' but both Krste and Patterson went and build chips in academia.
+
+\section{Matrix Computation}
+DW: what is the second paper about?
+Is it a paper?
+
+Sam: it's a chapter from a book.
+
+DW: what is the problem we're trying to solve.
+
+Sam: Ax = b, find x
+
+DW: what is A, x, and b
+They present this is a system of linear equations.
+What is A? Is it a scalar? A vector? A 1d or 2d structure?
+
+Sam: 2d
+
+DW: what does it represent?
+Going back to our basic linear algebra here:
+\begin{align*}
+    a_{11} x_{1} + a_{12} x_{2} + \cdots + a_{1n} x_{n} &= b_{1} \\
+    a_{21} x_{1} + a_{22} x_{2} + \cdots + a_{2n} x_{n} &= b_{2} \\
+    & \vdots \\
+    a_{n1} x_{1} + a_{n2} x_{2} + \cdots + a_{nn} x_{n} &= b_{n}
+\end{align*}
+
+DW: What does the \( A \) matrix represent?
+Sam: The coefficients
+
+DW: What is the \( b \)s?
+It's a 1d vector of \( b \)s?
+If we factor out all of the scalar, we can rewrite as
+\[
+A \vec{x} = \vec{b}
+\]
+
+DW: is this useful? Do we do this?
+Yes it's useful and people do it all the time!
+
+??: Take the inverse of the matrix
+DD: Gaussian elimination
+
+DW: What is GE?
+We take each row and multiplied it by something and subtracted it from another row.
+It all boils down to GE in some variation?
+DW: runtime of GE?
+?: \( O (n^3) \)
+DW: each row elim is order \( O(n) \)
+We could possibly have to do it \( O(n) \) times for a row to get it in order.
+And there are \( O(n) \) rows.
+Are we idiots because we did what the linear algebra book told us to do?
+If we have \( n \) processors does that help?
+???: it reduces the complexity to \( O(n^2) \).
+We can do the multiply, add, and subtract in parallel.
+
+What about \( n^2 \) processors?
+It doesn't really help.
+
+DW: Is this paper about GE? Heck no (maybe in a more abstract sense).
+
+What is this paper about?
+
+DW: iterative algorithms
+What is the trick that's being played here?
+Important part is that it's \textit{iterative}.
+
+Take a look at the math trick that's played here:
+boil everything down to this nice equation here:
+\[
+x_{i}(t + 1) = -\frac{1}{a_{ii}} [ \sum_{j \neq i} a_{ij} x_{j} (t) - b_{i} ]
+\]
+What's going on here?
+They basically solve this for \( x_{i} \) in terms of all of the other \( x_{j} \)s.
+Then they parameterize it with a time variable.
+Jacobi Iteration.
+Why is this good?
+??: It can be done in parallel. The solution for each \( x_{i} \) can be computing in parallel.
+DW: what is this dependent on?
+Not so great, it's dependent on everything else.
+We need to look at all other \( x_{j} \)s and we have to multiply and addition (and subtraction of a constant).
+DW: how many times do we have to iterate?
+R?: depends on word length
+DW: does this actually converge to the solution?
+DW: it always converges if there is a solution
+Some other algorithms will converge faster.
+Not guaranteed to get closed on each step, i.e.\ divergence for a few steps doens't mean anything.
+\\ \\
+DW: If we look at the equation, we can execute everything in parallel.
+DW: Can we do better?
+We can parallelize the multiplies.
+On a sequential computer, we have \( O (n^2) \) assuming time is constant.
+
+With \( O(n) \) processors, we have \( O(n) \) running time.
+
+With \( O(n^2) \) processors, we can do multiply in parallel, but we have to do additions, we this brings us down to \( \log{n} \).
+Communication pattern is all-to-all, which is pretty terrible.
+\\ \\
+Gauss-Siedel, is this good or bad for a parallel computer.
+Terrible for a parallel computer!
+We could break the dependence by recomputing another matrix, but it reduces to Jacobi iteration.
+It converges faster, but worse for parallel arch.
+\\ \\
+JOR: weighting the residual and the current value.
+Happens to converge faster, not trivial as to why this is the case.
+\\ \\
+Later in the paper, they come up with a practical problem.
+DW: What can you use these to solve?
+You can use it to solve differential equations.
+What can this be applied to?
+e.g.\ sheet of metal and discretize the space [Diagram 1 - of grid]
+compute the temperature
+Is this better or worse from before?
+DD: same problem, but linearly sparse, because you only need a fixed constant of values [Diagram 2 - block matrix]
+So that's kinda neat, this is very useful.
+It's \( O(n^2) \).
+With \( O(n) \) processors, we get down to \( O(n) \).
+With \( O(n^2) \) processors, we get down to \( O(1) \).
+And the communication pattern is much easier!
+\\ \\
+Using gray code to map communication topology for the multigrid, but you can use different refinements of the mesh.
+
+\section{Weather Code}
+Weather yesterday: snow, rain, freezing rain, sleet, hail, lots of stuff.
+Does this paper for today tell us about ML? Nope.
+Do you need ML to predict the weather?
+Is the weather dependent on basic laws of physics?
+This paper is trying to use basic laws of physics to predict the weather.
+DW: do people still use this?
+Greg/Dev: yes, both this (and maybe ML).
+DW: GFDL moved their supercomputers from Princeton to Oak Ridge, but they might move them back.
+DW: they are still using things that basically look like this.
+\\ \\
+DW: How is this weather code structured?
+DW: it takes the room and segments it.
+Read flatland, not PC in 2019, but an interesting read.
+The 3D-segments approximate cubes.
+We think we live in 3-space, so might as well segment into 3D objects.
+DW: communication pattern is with neighbors.
+What are the parameters?
+R?: wind vector, temp, specific humidity, pressure, geopotential, pressure.
+DW: we don't take into consideration if its raining in a cube in the model, but you can just take it as a function of these other factors.
+They take the cubes and map it to some cylindrical formation.
+Newer models do try to have poles and other more accurate notions.
+DW: can we discretize time and space?
+They do it.
+We compute the weather one timestep in the future based on some notion of step size.
+What is the communication pattern?
+Compute from neighborhood, 7 nodes (self, left, right, front, back, up, down).
+\\ \\
+How would we map this onto a computer?
+Sequential is \( O(n^3) \).
+The edges are fixed with boundary conditions.
+Some of this has changed over time, e.g.\ ground temperature.
+With \( O(n^3) \) processors, we can reach \( O(1) \).
+What does the communication look like?
+\\ \\
+With \( O(n) \) processors, with just planes, we have to communicate \( O(n^2) \) values.
+etc.
+\\ \\
+In L1, a ``sphere'' i.e.\ a cube maximizes volume while minimizing the surface area for communication.
+\\ \\
+What's the communication pattern for the tube?
+We have to allow for communication around.
+Thinking about mapping, we have to think about mapping to an actual machine.
+In the paper, they map this to the NYU ultracomputer.
+NYU used to do arch.
+Ultracomputer had a butterfly communication pattern.
+They say that the weather code doesn't do particularly well on the ultracomputer because there is no good parallelization that maps to a butterfly network.
+You want to try to map the communication pattern to the problem, otherwise you could have a problem.
+\\ \\
+Can you start before everyone else is done?
+Code is written with a heavyweight barrier.
+Ultracomputer is a shared mem machine.
+You could have a 3D matrix.
+\\ \\
+DW: want to talk about three terms (nomenclature).
+\begin{enumerate}
+    \item \textit{speed up}: the time it takes for a sequential computer divided by the time it takes for a parallel computer.
+    \item \textit{scaling}: plot performance against (y-var) against number of resources (x-var); if something ``scales,'' as you add more resources, then the performance goes up.
+    \item \textit{strong scaling}: fixed problem size, more resources, still scales; problem size / core goes down, but still scales
+    \item \textit{weak scaling}: you need to increase the problem size, then scales; we keep the work the same per core
+\end{enumerate}
+
+
+\end{document}
