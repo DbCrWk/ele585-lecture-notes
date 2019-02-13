@@ -15,7 +15,7 @@ According to our class, this paper is about
 \end{itemize}
 This paper is authored by researchers and scientists from various fields (e.g.\ computer architecture, scientific computing, etc).
 They are mostly faculty or senior research scientists at UC Berkeley (at the time, Krste Asanovic was moving from MIT to UCB).
-\\ \\
+
 Additionally, we determined that, stylistically, this paper:
 \begin{itemize}
     \item Is a summary of these researchers' discussions on parallel computing
@@ -66,7 +66,7 @@ As an aside, we also discussed the difference between manycore and multicore, si
 
 \subsection{Like and Dislike}\label{feb-11:a-view:like-dislike}
 We also discussed what everyone liked and disliked about this paper:
-\\ \\
+
 \textbf{Likes:}
 
 \begin{itemize}
@@ -121,7 +121,7 @@ We discuss how this ``wisdom'' has or has not held up, and if it was even true a
 
 This paper also introduces a notion of \textit{dwarfs}.
 Although this paper is not the first to use this terminology, they co-opted and extended it for the purposes of parallel computing.
-\\ \\
+
 We postulated a few definitions for a dwarf:
 \begin{itemize}
     \item better word: ``kernel''
@@ -136,13 +136,13 @@ We converged on these distinctions:
     \item A \textit{benchmark} is a specific implementation of a kernel, e.g.\ a specific program that runs FFT
 \end{enumerate}
 We also debated if dwarfs were useful:
-\\ \\
+
 While dwarfs lack the specificity of kernels and benchmarks, they can often be used as a guiding direction for designing systems for applications dominated by a single or set of kernels.
 Understanding the dwarves can also help us create better benchmarks: perhaps when implementing a benchmark, tracking a dwarf to get a general gist of its performance requirements would be useful.
-\\ \\
+
 However, it's important to note that whereas kernels and benchmarks are actionable, dwarfs are not.
 This leads to the major drawback of inability for comparison (i.e.\ how do you compare a GPU against a manycore?).
-\\ \\
+
 There was also a discussion on the conciseness of the list of dwarves and we generally agreed that the \textit{Monte Carlo} dwarf and some of the ones added later on were either too general or too problem-specific.
 
 \subsubsection{Usefulness/Communication patterns of Dwarfs}
