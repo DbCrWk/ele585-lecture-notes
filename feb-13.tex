@@ -69,7 +69,7 @@ This runtime complexity is extremely bad but if we have \( n \) processors that 
 
 \subsection{Jacobi Algorithm}
 
-We can reformulate the problem based on an iterative approach and boil everything down to this nice equation\footnote{This reformulation is known as the \textbf{Jacobi Algorithm}}:
+We can reformulate the problem based on an iterative approach\footnote{But isn't Gaussian elimination is also iterative? There is a notion that these "iterative" equations produce an approximate solution at the conclusion of every iteration and are thus classified as "iterative".} and boil everything down to this nice equation\footnote{This reformulation is known as the \textbf{Jacobi Algorithm.}}:
 
 \[
 x_{i}(t + 1) = -\frac{1}{a_{ii}} [ \sum_{j \neq i} a_{ij} x_{j} (t) - b_{i} ]
@@ -77,7 +77,7 @@ x_{i}(t + 1) = -\frac{1}{a_{ii}} [ \sum_{j \neq i} a_{ij} x_{j} (t) - b_{i} ]
 
 where you solve for \( x_{i} \) in terms of all of the other \( x_{j} \)s. The key operations are  multiplication and addition (and subtraction of a constant).
 
-One thing that we are garuanteed is convergence -- as long as a solution to the linear system of equations exists. Between different algorithms, some will lead to a faster convergence. It's also important to note that we are not guaranteed to get closer to the solution on each iteration, (i.e.\ divergence for a few steps doesn't mean much).
+One thing that we are garuanteed is convergence -- as long as a solution to the linear system of equations exists. Note that this does not depend on a specific order of equations or initial conditions. Between different algorithms, some will lead to a faster convergence. It's also important to note that we are not guaranteed to get closer to the solution on each iteration, (i.e.\ divergence for a few steps doesn't mean much).
 
 Note the parameterization of this problem with a time variable -- this allows the problem to be tackled in a parallel manner (i.e. the solution for each \( x_{i}(t+1) \) can be computing in parallel). However, in calculating \( x_{i}(t+1) \), we need to look at all other \( x_{j} (t)\)s -- this causes a huge dependency bottleneck. 
 
@@ -90,7 +90,7 @@ Also, communication pattern is all-to-all, which is pretty terrible.
 The Gauss-Seidel algorithm is terrible for a parallel computer\footnote{We could break the dependence by recomputing another matrix, but it reduces to Jacobi iteration.}! While this algorithm converges faster, it is worse for parallel architectures.
 
 \subsection{Jacobi Overrelaxation (JOR)}
-The intuition behind this is that we are weighting the residual and the current value to achieve a faster convergence (not trivial as to why this is the case).
+The intuition behind this is that we are weighting the residual and the current value to achieve a faster convergence (not trivial as to why this is the case). Also, since step sizes are smaller, propagated errors are also smaller.
 
 \subsection{Application examples}
 
@@ -98,7 +98,7 @@ Later in the paper, we talk about using these iterative methods to solve differe
 
 This is, in general, the same problem as our aforementioned linear system of equations except for the fact that it is linearly sparse. Thus, you only need a fixed constant of values [Diagram 2 - block matrix].
 
-Because of this sparse nature, it has a \( O(n^2) \) runtime complexity. With \( O(n) \) processors, we can get that down to \( O(n) \). With \( O(n^2) \) processors, we get down to \( O(1) \) -- something that we could not accomplish before! On top of that, the communication pattern is much easier!
+Because of this sparse nature, it has a \( O(n^2) \) runtime complexity. With \( O(n) \) processors, we can get that down to \( O(n) \). With \( O(n^2) \) processors, we get down to \( O(1) \) -- something that we could have only achieved with the proximity of the neighbors! On top of that, the communication pattern is much easier!
 
 Lastly, we can use gray code to map the communication topology for a multigrid topology.
 
