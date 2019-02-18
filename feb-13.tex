@@ -1,61 +1,43 @@
 \input{config/document-setup}
 
 \begin{document}
-\lecture{Class Discussion Notes}{February 13, 2019}{Dev Dabke}
+\lecture{Class Discussion Notes}{February 13, 2019}{Dev Dabke, Samuel Hsia}
 
 \section{A View from Berkeley}
-DW: Discuss conclusions, did people learn something new? End of the paper?
-What was the conclusion of the paper?
-Did we like the end?
-Some autotuners were thrown in for good luck?
 
-DW: If we go into the conclusion section.
-The conclusion just rambles a little bit.
-The weakest conclusion ever.
-Terrible conclusion!
-Conclusions should be concise and to the point, and this is not that.
+\subsection{On the Conclusion}
 
-Anything else?
-Greg: can we talk about autotuners?
+The general consensus was that the conclusion rambled on quite a bit. Because, of this, we agreed that, in terms of position papers, it is rather weak. Conclusions should be concise and to the point -- this paper fails to achieve this. 
 
-DW: what is an autotuner?
-DW: an autotuner is a piece of software that has an optimization algorithm that looks at how code is running and then somehow modifies the code based on some optimization criterion.
-It could just be changing parameters.
-e.g.\ if you have the blocking size of an algorithm or some other parameter (outer loop vs. inner loop parallelism) that you want to optimize, but you change parameters as you run
-Greg: not used widely?
-DW: it depends. If you're doing supercomputing with dense matrix codes, a lot of the libraries that people use under the hood use that.
-FFTW is by definition an autotuner.
-It subsumes all implementions of FFT within it.
-At run time, it tests the arch and tune the algo dynamically to the running code.
-BLAS is something similar what they're doing these days what the supercomputing stuff people use.
-LINPACK
+\subsection{Final Remarks}
 
-Some autotuner optimize for arch, some optimize for dunamic events going on in the system.
+\subsubsection{Autotuners}
 
-DW: any other things that came up that you didn't know what they were?
-Peter: how do virtual machines connect to parallel computing?
-DW: it doesn't connect at all. Probably some random research thing that someone threw in for one of the professors.
-DW: talking about RAMP is a non-sequitur.
-``Academics shouldn't build chips'' but both Krste and Patterson went and build chips in academia.
+An \textbf{autotuner}\footnote{Autotuners are also referred to as "self-tuning systems" in the context of control theory based applications.} is a piece of software with an optimization algorithm that looks at how code is running and then subsequently modifies the code based on some optimization criterion.
 
-\section{Matrix Computation}
-DW: what is the second paper about?
-Is it a paper?
+Autotuners often accomplish this modification by changing parameters. For example, if you have the blocking size of an algorithm or some other parameter (outer loop vs. inner loop parallelism) that you want to optimize, you can change these parameters as you execute your program. In general, these systems attempt to find an optimal condition for an objective function while minimizing an associated error function.
 
-Sam: it's a chapter from a book.
+Autotuners are used widely -- but only in certain contexts. In the world of supercomputing, where dense matrix codes are prevalent, a lot of the computational libraries that people use under the hood rely on autotuners. An example of this would be \textbf{FFTW (Fastest Fourier Transform in the West}. It subsumes all implementations of FFT within it and, at run time, tests the architecture and tunes the algorithm dynamically to the running code. While the FFTW optimizes based on the architecture, other autotuner will optimize based on the dynamic events of the system. Other more notable software libraries that utilize autotuners include BLAS and LINPACK (both heavily relied upon in supercomputing applications).
 
-DW: what is the problem we're trying to solve.
+\subsubsection{Virtual Machines}
 
-Sam: Ax = b, find x
+Virtual machines and parallel computing don't really have any direct connections. It is very possible that the discussion on virtual machines was included for one of the authors.
 
-DW: what is A, x, and b
-They present this is a system of linear equations.
-What is A? Is it a scalar? A vector? A 1d or 2d structure?
+\subsubsection{RAMP}
 
-Sam: 2d
+The discussion on RAMP is rather non-sequitur. As proven later on, the sentiment that ``Academics shouldn't build chips'' was not really followed as both Krste Asanovic and David Patterson went on and built prototype chips in academia.
 
-DW: what does it represent?
-Going back to our basic linear algebra here:
+\section{Iterative Methods for Linear Equations}
+
+This is not a papers - but rather a chapter within a book\footnote{\textit{Parallel and Distributed Computing Numerical Methods} by Bertsekas and Tsitsikus.}. It focuses on solving the classic system of linear equations:
+
+\begin{align*}
+    \text{Given }Ax = b, \text{find } x
+\end{align*}
+
+where $A$ is a 2D structure containing the coefficients of the system and $b$ is a 1D vector.
+
+Going back to our basic linear algebra here, our problem can be expanded to:
 \begin{align*}
     a_{11} x_{1} + a_{12} x_{2} + \cdots + a_{1n} x_{n} &= b_{1} \\
     a_{21} x_{1} + a_{22} x_{2} + \cdots + a_{2n} x_{n} &= b_{2} \\
@@ -63,102 +45,64 @@ Going back to our basic linear algebra here:
     a_{n1} x_{1} + a_{n2} x_{2} + \cdots + a_{nn} x_{n} &= b_{n}
 \end{align*}
 
-DW: What does the \( A \) matrix represent?
-Sam: The coefficients
-
-DW: What is the \( b \)s?
-It's a 1d vector of \( b \)s?
 If we factor out all of the scalar, we can rewrite as
 \[
 A \vec{x} = \vec{b}
 \]
 
-DW: is this useful? Do we do this?
-Yes it's useful and people do it all the time!
+\textbf{Is this useful and how do we get about solving this problem?}
 
-??: Take the inverse of the matrix
-DD: Gaussian elimination
+Linear systems are extremely powerful and the canonical way of solving this is by finding $A^{-1}$ with \textbf{Gaussian Elimination}.
 
-DW: What is GE?
-We take each row and multiplied it by something and subtracted it from another row.
-It all boils down to GE in some variation?
-DW: runtime of GE?
-?: \( O (n^3) \)
-DW: each row elim is order \( O(n) \)
-We could possibly have to do it \( O(n) \) times for a row to get it in order.
-And there are \( O(n) \) rows.
-Are we idiots because we did what the linear algebra book told us to do?
-If we have \( n \) processors does that help?
-???: it reduces the complexity to \( O(n^2) \).
-We can do the multiply, add, and subtract in parallel.
+\subsection{Gaussian Elimination}
 
-What about \( n^2 \) processors?
-It doesn't really help.
+In general, we take each row, multiply it by a constant, and subtract it from another row to end up with a diagonal matrix. 
 
-DW: Is this paper about GE? Heck no (maybe in a more abstract sense).
+The runtime of Gaussian Elimination is \( O (n^3) \):
+\begin{itemize}
+    \item Each row elimination is order \( O(n) \)
+    \item We could have to do it \( O(n) \) times for a row to get it in order.
+    \item There are \( O(n) \) rows.
+\end{itemize}
 
-What is this paper about?
+This runtime complexity is extremely bad but if we have \( n \) processors that reduces the complexity to \( O(n^2) \) because we can do the multiply, add, and subtract in parallel. However, scaling to \( n^2 \) processors does not really help. \textbf{However, this paper is not about Gaussian Elimination} -- it is about \textbf{iterative algorithms}. 
 
-DW: iterative algorithms
-What is the trick that's being played here?
-Important part is that it's \textit{iterative}.
+\subsection{Jacobi Algorithm}
 
-Take a look at the math trick that's played here:
-boil everything down to this nice equation here:
+We can reformulate the problem based on an iterative approach and boil everything down to this nice equation\footnote{This reformulation is known as the \textbf{Jacobi Algorithm}}:
+
 \[
 x_{i}(t + 1) = -\frac{1}{a_{ii}} [ \sum_{j \neq i} a_{ij} x_{j} (t) - b_{i} ]
 \]
-What's going on here?
-They basically solve this for \( x_{i} \) in terms of all of the other \( x_{j} \)s.
-Then they parameterize it with a time variable.
-Jacobi Iteration.
-Why is this good?
-??: It can be done in parallel. The solution for each \( x_{i} \) can be computing in parallel.
-DW: what is this dependent on?
-Not so great, it's dependent on everything else.
-We need to look at all other \( x_{j} \)s and we have to multiply and addition (and subtraction of a constant).
-DW: how many times do we have to iterate?
-R?: depends on word length
-DW: does this actually converge to the solution?
-DW: it always converges if there is a solution
-Some other algorithms will converge faster.
-Not guaranteed to get closed on each step, i.e.\ divergence for a few steps doens't mean anything.
-\\ \\
-DW: If we look at the equation, we can execute everything in parallel.
-DW: Can we do better?
-We can parallelize the multiplies.
-On a sequential computer, we have \( O (n^2) \) assuming time is constant.
 
-With \( O(n) \) processors, we have \( O(n) \) running time.
+where you solve for \( x_{i} \) in terms of all of the other \( x_{j} \)s. The key operations are  multiplication and addition (and subtraction of a constant).
 
-With \( O(n^2) \) processors, we can do multiply in parallel, but we have to do additions, we this brings us down to \( \log{n} \).
-Communication pattern is all-to-all, which is pretty terrible.
-\\ \\
-Gauss-Siedel, is this good or bad for a parallel computer.
-Terrible for a parallel computer!
-We could break the dependence by recomputing another matrix, but it reduces to Jacobi iteration.
-It converges faster, but worse for parallel arch.
-\\ \\
-JOR: weighting the residual and the current value.
-Happens to converge faster, not trivial as to why this is the case.
-\\ \\
-Later in the paper, they come up with a practical problem.
-DW: What can you use these to solve?
-You can use it to solve differential equations.
-What can this be applied to?
-e.g.\ sheet of metal and discretize the space [Diagram 1 - of grid]
-compute the temperature
-Is this better or worse from before?
-DD: same problem, but linearly sparse, because you only need a fixed constant of values [Diagram 2 - block matrix]
-So that's kinda neat, this is very useful.
-It's \( O(n^2) \).
-With \( O(n) \) processors, we get down to \( O(n) \).
-With \( O(n^2) \) processors, we get down to \( O(1) \).
-And the communication pattern is much easier!
-\\ \\
-Using gray code to map communication topology for the multigrid, but you can use different refinements of the mesh.
+One thing that we are garuanteed is convergence -- as long as a solution to the linear system of equations exists. Between different algorithms, some will lead to a faster convergence. It's also important to note that we are not guaranteed to get closer to the solution on each iteration, (i.e.\ divergence for a few steps doesn't mean much).
 
-\section{Weather Code}
+Note the parameterization of this problem with a time variable -- this allows the problem to be tackled in a parallel manner (i.e. the solution for each \( x_{i}(t+1) \) can be computing in parallel). However, in calculating \( x_{i}(t+1) \), we need to look at all other \( x_{j} (t)\)s -- this causes a huge dependency bottleneck. 
+
+Assuming time is constant, we can achieve a \( O (n^2) \) runtime on a sequential computer. If we can parallelize the multiplies With \( O(n) \) processors, we have \( O(n) \) running time. With \( O(n^2) \) processors, we can do multiplies in parallel, but we would still have to do additions -- this brings us down to \( \log{n} \).
+
+Also, communication pattern is all-to-all, which is pretty terrible.
+
+\subsection{Gauss-Seidel Algorithm}
+
+The Gauss-Seidel algorithm is terrible for a parallel computer\footnote{We could break the dependence by recomputing another matrix, but it reduces to Jacobi iteration.}! While this algorithm converges faster, it is worse for parallel architectures.
+
+\subsection{Jacobi Overrelaxation (JOR)}
+The intuition behind this is that we are weighting the residual and the current value to achieve a faster convergence (not trivial as to why this is the case).
+
+\subsection{Application examples}
+
+Later in the paper, we talk about using these iterative methods to solve differential equations (e.g.\ discretizing the space and calculating the temperature of a sheet of metal [Diagram 1 - of grid]).
+
+This is, in general, the same problem as our aforementioned linear system of equations except for the fact that it is linearly sparse. Thus, you only need a fixed constant of values [Diagram 2 - block matrix].
+
+Because of this sparse nature, it has a \( O(n^2) \) runtime complexity. With \( O(n) \) processors, we can get that down to \( O(n) \). With \( O(n^2) \) processors, we get down to \( O(1) \) -- something that we could not accomplish before! On top of that, the communication pattern is much easier!
+
+Lastly, we can use gray code to map the communication topology for a multigrid topology.
+
+\section{The Weather Code}
 Weather yesterday: snow, rain, freezing rain, sleet, hail, lots of stuff.
 Does this paper for today tell us about ML? Nope.
 Do you need ML to predict the weather?
