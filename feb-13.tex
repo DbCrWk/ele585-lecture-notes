@@ -13,7 +13,7 @@ The general consensus was that the conclusion rambled on quite a bit. Because, o
 
 \subsubsection{Autotuners}
 
-An \textbf{autotuner}\footnote{Autotuners are also referred to as "self-tuning systems" in the context of control theory based applications.} is a piece of software with an optimization algorithm that looks at how code is running and then subsequently modifies the code based on some optimization criterion.
+An \textbf{autotuner}\footnote{Autotuners are also referred to as ``self-tuning systems" in the context of control theory based applications.} is a piece of software with an optimization algorithm that looks at how code is running and then subsequently modifies the code based on some optimization criterion.
 
 Autotuners often accomplish this modification by changing parameters. For example, if you have the blocking size of an algorithm or some other parameter (outer loop vs. inner loop parallelism) that you want to optimize, you can change these parameters as you execute your program. In general, these systems attempt to find an optimal condition for an objective function while minimizing an associated error function.
 
@@ -69,7 +69,7 @@ This runtime complexity is extremely bad but if we have \( n \) processors that 
 
 \subsection{Jacobi Algorithm}
 
-We can reformulate the problem based on an iterative approach\footnote{But isn't Gaussian elimination is also iterative? There is a notion that these "iterative" equations produce an approximate solution at the conclusion of every iteration and are thus classified as "iterative".} and boil everything down to this nice equation\footnote{This reformulation is known as the \textbf{Jacobi Algorithm.}}:
+We can reformulate the problem based on an iterative approach\footnote{But isn't Gaussian elimination also ``iterative"? There is a notion that these ``iterative" equations produce an approximate solution at the conclusion of every iteration and are thus classified as ``iterative".} and boil everything down to this nice equation:
 
 \[
 x_{i}(t + 1) = -\frac{1}{a_{ii}} [ \sum_{j \neq i} a_{ij} x_{j} (t) - b_{i} ]
@@ -77,9 +77,7 @@ x_{i}(t + 1) = -\frac{1}{a_{ii}} [ \sum_{j \neq i} a_{ij} x_{j} (t) - b_{i} ]
 
 where you solve for \( x_{i} \) in terms of all of the other \( x_{j} \)s. The key operations are  multiplication and addition (and subtraction of a constant).
 
-One thing that we are garuanteed is convergence -- as long as a solution to the linear system of equations exists. Note that this does not depend on a specific order of equations or initial conditions. Between different algorithms, some will lead to a faster convergence. It's also important to note that we are not guaranteed to get closer to the solution on each iteration, (i.e.\ divergence for a few steps doesn't mean much).
-
-Note the parameterization of this problem with a time variable -- this allows the problem to be tackled in a parallel manner (i.e. the solution for each \( x_{i}(t+1) \) can be computing in parallel). However, in calculating \( x_{i}(t+1) \), we need to look at all other \( x_{j} (t)\)s -- this causes a huge dependency bottleneck. 
+One thing that we are guaranteed is convergence -- as long as a solution to the linear system of equations exists. Note that this does not depend on a specific order of equations or initial conditions. Between different algorithms, some will lead to a faster convergence. It's also important to note that we are not guaranteed to get closer to the solution on each iteration, (i.e.\ divergence for a few steps doesn't mean much).
 
 Assuming time is constant, we can achieve a \( O (n^2) \) runtime on a sequential computer. If we can parallelize the multiplies With \( O(n) \) processors, we have \( O(n) \) running time. With \( O(n^2) \) processors, we can do multiplies in parallel, but we would still have to do additions -- this brings us down to \( \log{n} \).
 
@@ -103,66 +101,41 @@ Because of this sparse nature, it has a \( O(n^2) \) runtime complexity. With \(
 Lastly, we can use gray code to map the communication topology for a multigrid topology.
 
 \section{The Weather Code}
-Weather yesterday: snow, rain, freezing rain, sleet, hail, lots of stuff.
-Does this paper for today tell us about ML? Nope.
-Do you need ML to predict the weather?
-Is the weather dependent on basic laws of physics?
-This paper is trying to use basic laws of physics to predict the weather.
-DW: do people still use this?
-Greg/Dev: yes, both this (and maybe ML).
-DW: GFDL moved their supercomputers from Princeton to Oak Ridge, but they might move them back.
-DW: they are still using things that basically look like this.
-\\ \\
-DW: How is this weather code structured?
-DW: it takes the room and segments it.
-Read flatland, not PC in 2019, but an interesting read.
-The 3D-segments approximate cubes.
-We think we live in 3-space, so might as well segment into 3D objects.
-DW: communication pattern is with neighbors.
-What are the parameters?
-R?: wind vector, temp, specific humidity, pressure, geopotential, pressure.
-DW: we don't take into consideration if its raining in a cube in the model, but you can just take it as a function of these other factors.
-They take the cubes and map it to some cylindrical formation.
-Newer models do try to have poles and other more accurate notions.
-DW: can we discretize time and space?
-They do it.
-We compute the weather one timestep in the future based on some notion of step size.
-What is the communication pattern?
-Compute from neighborhood, 7 nodes (self, left, right, front, back, up, down).
-\\ \\
-How would we map this onto a computer?
-Sequential is \( O(n^3) \).
-The edges are fixed with boundary conditions.
-Some of this has changed over time, e.g.\ ground temperature.
-With \( O(n^3) \) processors, we can reach \( O(1) \).
-What does the communication look like?
-\\ \\
-With \( O(n) \) processors, with just planes, we have to communicate \( O(n^2) \) values.
-etc.
-\\ \\
-In L1, a ``sphere'' i.e.\ a cube maximizes volume while minimizing the surface area for communication.
-\\ \\
-What's the communication pattern for the tube?
-We have to allow for communication around.
-Thinking about mapping, we have to think about mapping to an actual machine.
-In the paper, they map this to the NYU ultracomputer.
-NYU used to do arch.
-Ultracomputer had a butterfly communication pattern.
-They say that the weather code doesn't do particularly well on the ultracomputer because there is no good parallelization that maps to a butterfly network.
-You want to try to map the communication pattern to the problem, otherwise you could have a problem.
-\\ \\
-Can you start before everyone else is done?
-Code is written with a heavyweight barrier.
-Ultracomputer is a shared mem machine.
-You could have a 3D matrix.
-\\ \\
-DW: want to talk about three terms (nomenclature).
+
+With all the hype surrounding machine learning, it may come as a surprise that the weather prediction model used in this paper relies only on the basic laws of physics\footnote{The methodology/model outlined in this paper is still widely in use today.}. 
+
+\subsection{Structure of the Code}
+
+The weather code is based on the idea of taking a physical space (i.e. Earth) and segmenting it into 3D approximate cubes and then combining them into a cylindrical approximation of the Earth and its atmosphere\footnote{Newer versions of this model have tried to map the poles in a more accurate manner -- but this version works just fine without the poles touching. Also, the edges are fixed with boundary conditions.
+Some of this has changed over time (e.g. ground temperature).}. The parameters associated with each cube are:
+
+\begin{itemize}
+    \item wind vector
+    \item temperature
+    \item specific humidity
+    \item pressure
+    \item geopotential
+\end{itemize}
+
+Interestingly, we do not take into consideration of other factors such as precipitation and cloudiness - the model just assumes these as functions of these fundamental factors.
+
+After discretizing time, we compute the weather one time-step in the future based on some notion of step size. The communication pattern of the model is predominately restricted to each cubes' neighbors (7 nodes (self, left, right, front, back, up, down).
+
+\subsection{Mapping the Code}
+
+If we were to map this onto a sequential computer, we would get an \( O(n^3) \) complexity.
+The edges are fixed with boundary conditions. With \( O(n) \) processors, with just planes, we have to communicate \( O(n^2) \) values. With \( O(n^3) \) processors, we can reach \( O(1) \). In the paper, they map this to the NYU Ultracomputer (shared memory model), with has a butterfly communication pattern\footnote{Interestingly, the weather code doesn't do particularly well on the Ultracomputer because there is no good parallelization that maps to a butterfly network.}.
+
+In general, you want to try to map the communication pattern to the problem, otherwise you could have a problem.
+
+In terms of synchronization, there are heavyweight barriers at the outer-loop level.
+
+\subsection{Speedup}
 \begin{enumerate}
     \item \textit{speed up}: the time it takes for a sequential computer divided by the time it takes for a parallel computer.
     \item \textit{scaling}: plot performance against (y-var) against number of resources (x-var); if something ``scales,'' as you add more resources, then the performance goes up.
     \item \textit{strong scaling}: fixed problem size, more resources, still scales; problem size / core goes down, but still scales
     \item \textit{weak scaling}: you need to increase the problem size, then scales; we keep the work the same per core
 \end{enumerate}
-
 
 \end{document}
