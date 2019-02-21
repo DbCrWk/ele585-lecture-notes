@@ -7,17 +7,17 @@
 
 \subsection{On the Conclusion}
 
-The general consensus was that the conclusion rambled on quite a bit. Because, of this, we agreed that, in terms of position papers, it is rather weak. Conclusions should be concise and to the point -- this paper fails to achieve this. 
+The general consensus was that the conclusion rambled on quite a bit. Because, of this, we agreed that, in terms of position papers, it is rather weak. Conclusions should be concise and to the point---this paper fails to achieve this.
 
 \subsection{Final Remarks}
 
 \subsubsection{Autotuners}
 
-An \textbf{autotuner}\footnote{Autotuners are also referred to as ``self-tuning systems" in the context of control theory based applications.} is a piece of software with an optimization algorithm that looks at how code is running and then subsequently modifies the code based on some optimization criterion.
+An \textbf{autotuner}\footnote{Autotuners are also referred to as ``self-tuning systems'' in the context of control theory based applications.} is a piece of software with an optimization algorithm that looks at how code is running and then subsequently modifies the code based on some optimization criterion.
 
-Autotuners often accomplish this modification by changing parameters. For example, if you have the blocking size of an algorithm or some other parameter (outer loop vs. inner loop parallelism) that you want to optimize, you can change these parameters as you execute your program. In general, these systems attempt to find an optimal condition for an objective function while minimizing an associated error function.
+Autotuners often accomplish this modification by changing parameters. For example, if you have the blocking size of an algorithm or some other parameter (outer loop vs.\ inner loop parallelism) that you want to optimize, you can change these parameters as you execute your program. In general, these systems attempt to find an optimal condition for an objective function while minimizing an associated error function.
 
-Autotuners are used widely -- but only in certain contexts. In the world of supercomputing, where dense matrix codes are prevalent, a lot of the computational libraries that people use under the hood rely on autotuners. An example of this would be \textbf{FFTW (Fastest Fourier Transform in the West}. It subsumes all implementations of FFT within it and, at run time, tests the architecture and tunes the algorithm dynamically to the running code. While the FFTW optimizes based on the architecture, other autotuner will optimize based on the dynamic events of the system. Other more notable software libraries that utilize autotuners include BLAS and LINPACK (both heavily relied upon in supercomputing applications).
+Autotuners are used widely, but only in certain contexts. In the world of supercomputing, where dense matrix codes are prevalent, a lot of the computational libraries that people use under the hood rely on autotuners. An example of this would be \textbf{FFTW (Fastest Fourier Transform in the West)}. It subsumes all implementations of FFT within it and, at run time, tests the architecture and tunes the algorithm dynamically to the running code. While the FFTW optimizes based on the architecture, other autotuner will optimize based on the dynamic events of the system. Other more notable software libraries that utilize autotuners include BLAS and LINPACK (both heavily relied upon in supercomputing applications).
 
 \subsubsection{Virtual Machines}
 
@@ -29,13 +29,13 @@ The discussion on RAMP is rather non-sequitur. As proven later on, the sentiment
 
 \section{Iterative Methods for Linear Equations}
 
-This is not a papers - but rather a chapter within a book\footnote{\textit{Parallel and Distributed Computing Numerical Methods} by Bertsekas and Tsitsikus.}. It focuses on solving the classic system of linear equations:
+This is not a paper, but rather a chapter within a book\footnote{\textit{Parallel and Distributed Computing Numerical Methods} by Bertsekas and Tsitsikus.}. It focuses on solving the classic system of linear equations:
 
 \begin{align*}
-    \text{Given }Ax = b, \text{find } x
+    \text{Given }A\vec{x} = b, \text{find } \vec{x}
 \end{align*}
 
-where $A$ is a 2D structure containing the coefficients of the system and $b$ is a 1D vector.
+where \( A \) is a 2D matrix structure containing the coefficients of the system and \( \vec{b} \) is a 1D vector.
 
 Going back to our basic linear algebra here, our problem can be expanded to:
 \begin{align*}
@@ -45,18 +45,13 @@ Going back to our basic linear algebra here, our problem can be expanded to:
     a_{n1} x_{1} + a_{n2} x_{2} + \cdots + a_{nn} x_{n} &= b_{n}
 \end{align*}
 
-If we factor out all of the scalar, we can rewrite as
-\[
-A \vec{x} = \vec{b}
-\]
-
 \textbf{Is this useful and how do we get about solving this problem?}
 
-Linear systems are extremely powerful and the canonical way of solving this is by finding $A^{-1}$ with \textbf{Gaussian Elimination}.
+Linear systems are extremely powerful and the canonical way of solving this is by finding \( A^{-1} \) with \textbf{Gaussian Elimination} (assuming that \( A \) is indeed invertible).
 
 \subsection{Gaussian Elimination}
 
-In general, we take each row, multiply it by a constant, and subtract it from another row to end up with a diagonal matrix. 
+In general, we take each row, multiply it by a constant, and subtract it from another row to end up with a diagonal matrix.
 
 The runtime of Gaussian Elimination is \( O (n^3) \):
 \begin{itemize}
@@ -65,21 +60,21 @@ The runtime of Gaussian Elimination is \( O (n^3) \):
     \item There are \( O(n) \) rows.
 \end{itemize}
 
-This runtime complexity is extremely bad but if we have \( n \) processors that reduces the complexity to \( O(n^2) \) because we can do the multiply, add, and subtract in parallel. However, scaling to \( n^2 \) processors does not really help. \textbf{However, this paper is not about Gaussian Elimination} -- it is about \textbf{iterative algorithms}. 
+This runtime complexity is extremely bad but if we have \( n \) processors that reduces the complexity to \( O(n^2) \) because we can do the multiply, add, and subtract in parallel. However, scaling to \( n^2 \) processors does not really help. \textbf{However, this paper is not about Gaussian Elimination}; it is about \textbf{iterative algorithms}.
 
 \subsection{Jacobi Algorithm}
 
-We can reformulate the problem based on an iterative approach\footnote{But isn't Gaussian elimination also ``iterative"? There is a notion that these ``iterative" equations produce an approximate solution at the conclusion of every iteration and are thus classified as ``iterative".} and boil everything down to this nice equation:
+We can reformulate the problem based on an iterative approach\footnote{But isn't Gaussian elimination also ``iterative?'' There is a notion that these ``iterative'' equations produce an approximate solution at the conclusion of every iteration and are thus classified as ``iterative.''} and boil everything down to this nice equation:
 
 \[
-x_{i}(t + 1) = -\frac{1}{a_{ii}} [ \sum_{j \neq i} a_{ij} x_{j} (t) - b_{i} ]
+x_{i}(t + 1) = -\frac{1}{a_{ii}} \left[ \sum_{j \neq i} a_{ij} x_{j} (t) - b_{i} \right]
 \]
 
 where you solve for \( x_{i} \) in terms of all of the other \( x_{j} \)s. The key operations are  multiplication and addition (and subtraction of a constant).
 
-One thing that we are guaranteed is convergence -- as long as a solution to the linear system of equations exists. Note that this does not depend on a specific order of equations or initial conditions. Between different algorithms, some will lead to a faster convergence. It's also important to note that we are not guaranteed to get closer to the solution on each iteration, (i.e.\ divergence for a few steps doesn't mean much).
+One thing that we are guaranteed is convergence, as long as a solution to the linear system of equations exists. Note that this does not depend on a specific order of equations or initial conditions. Between different algorithms, some will lead to a faster convergence. It's also important to note that we are not guaranteed to get closer to the solution on each iteration, (i.e.\ divergence for a few steps doesn't mean much).
 
-Assuming time is constant, we can achieve a \( O (n^2) \) runtime on a sequential computer. If we can parallelize the multiplies With \( O(n) \) processors, we have \( O(n) \) running time. With \( O(n^2) \) processors, we can do multiplies in parallel, but we would still have to do additions -- this brings us down to \( \log{n} \).
+Assuming time is constant, we can achieve a \( O (n^2) \) runtime on a sequential computer. If we can parallelize the multiplies With \( O(n) \) processors, we have \( O(n) \) running time. With \( O(n^2) \) processors, we can do multiplies in parallel, but we would still have to do additions this brings us down to \( \log{n} \).
 
 Also, communication pattern is all-to-all, which is pretty terrible.
 
@@ -92,22 +87,29 @@ The intuition behind this is that we are weighting the residual and the current 
 
 \subsection{Application examples}
 
-Later in the paper, we talk about using these iterative methods to solve differential equations (e.g.\ discretizing the space and calculating the temperature of a sheet of metal [Diagram 1 - of grid]).
+Later in the paper, we talk about using these iterative methods to solve differential equations (e.g.\ discretizing the space and calculating the temperature of a sheet of metal).
 
-This is, in general, the same problem as our aforementioned linear system of equations except for the fact that it is linearly sparse. Thus, you only need a fixed constant of values [Diagram 2 - block matrix].
+This is, in general, the same problem as our aforementioned linear system of equations except for the fact that it is linearly sparse. Thus, you only need a fixed constant of values:
+\[
+\begin{bmatrix}
+    \ddots & 0 & 0 \\
+    0 & \ddots & 0 \\
+    0 & 0 & \ddots
+\end{bmatrix}
+\]
 
-Because of this sparse nature, it has a \( O(n^2) \) runtime complexity. With \( O(n) \) processors, we can get that down to \( O(n) \). With \( O(n^2) \) processors, we get down to \( O(1) \) -- something that we could have only achieved with the proximity of the neighbors! On top of that, the communication pattern is much easier!
+Because of this sparse nature, it has a \( O(n^2) \) runtime complexity. With \( O(n) \) processors, we can get that down to \( O(n) \). With \( O(n^2) \) processors, we get down to \( O(1) \), something that we could have only achieved with the proximity of the neighbors. On top of that, the communication pattern is much easier.
 
 Lastly, we can use gray code to map the communication topology for a multigrid topology.
 
 \section{The Weather Code}
 
-With all the hype surrounding machine learning, it may come as a surprise that the weather prediction model used in this paper relies only on the basic laws of physics\footnote{The methodology/model outlined in this paper is still widely in use today.}. 
+With all the hype surrounding machine learning, it may come as a surprise that the weather prediction model used in this paper relies only on the basic laws of physics\footnote{The methodology/model outlined in this paper is still widely in use today.}.
 
 \subsection{Structure of the Code}
 
-The weather code is based on the idea of taking a physical space (i.e. Earth) and segmenting it into 3D approximate cubes and then combining them into a cylindrical approximation of the Earth and its atmosphere\footnote{Newer versions of this model have tried to map the poles in a more accurate manner -- but this version works just fine without the poles touching. Also, the edges are fixed with boundary conditions.
-Some of this has changed over time (e.g. ground temperature).}. The parameters associated with each cube are:
+The weather code is based on the idea of taking a physical space (i.e.\ Earth) and segmenting it into 3D approximate cubes and then combining them into a cylindrical approximation of the Earth and its atmosphere\footnote{Newer versions of this model have tried to map the poles in a more accurate manner, but this version works just fine without the poles touching. Also, the edges are fixed with boundary conditions.
+Some of this has changed over time (e.g.\ ground temperature).}. The parameters associated with each cube are:
 
 \begin{itemize}
     \item wind vector
@@ -117,9 +119,9 @@ Some of this has changed over time (e.g. ground temperature).}. The parameters a
     \item geopotential
 \end{itemize}
 
-Interestingly, we do not take into consideration of other factors such as precipitation and cloudiness - the model just assumes these as functions of these fundamental factors.
+Interestingly, we do not take into consideration of other factors such as precipitation and cloudiness; the model just assumes these as functions of these fundamental factors.
 
-After discretizing time, we compute the weather one time-step in the future based on some notion of step size. The communication pattern of the model is predominately restricted to each cubes' neighbors (7 nodes (self, left, right, front, back, up, down).
+After discretizing time, we compute the weather one time-step in the future based on some notion of step size. The communication pattern of the model is predominately restricted to each cubes' neighborhood: self, left, right, front, back, up, down.
 
 \subsection{Mapping the Code}
 
