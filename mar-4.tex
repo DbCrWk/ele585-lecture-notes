@@ -1,0 +1,108 @@
+\input{config/document-setup}
+
+\begin{document}
+\lecture{Class Discussion Notes}{March 4, 2019}{Dev Dabke}
+
+Discussing parallel computing models
+Message passing vs.\ shared memory
+
+?: message passing can scale to ``infinite'' nodes; and each programmer can develop independent components and merge them together using message passing; scale, componentization
+
+Sam: I haven't really programmed in either; shared memory has easier programs to write
+
+DW: we all read about both
+DW: anyone want to add things
+Greg: what is componentization
+
+?: you can develop separate systems as long as message passing interface is agreed upon
+Greg: I would argue with this point and say that you would have to coordinate both the sender and receiver or you could get massive deadlocks
+?: but shared memory also has deadlocks
+
+DW: let's define deadlock is when you a communication pattern such that there is a cycle in the communication graph (aka.\ hold/waits for graph), you have a possibility for deadlock
+DW: how is that different from livelock; in deadlock some portion of the system has stopped, whereas livelock is we're doing work, but not making forward progress. e.g.\ from the real world: you have some protocol where everyone in this room has a card and your job is to gather all the pieces of paper in the room, but your own. Whenever someone asks you for a piece of paper, you have to give it up. As soon as DW says ``go'' everyone is going to start asking, but no one is going to end up winning out; then, you give the piece of paper back. Therefore, you're doing work, but not actually making forward progress.
+
+??: chose message passing because I agree with (?) because you can make it more componentized, which makes it easier.
+?: I think the idea is that you operate your own objects, and I don't want anyone else to modify my objects.
+
+DW: shared memory and message passing are just models, but there are many different implementations
+Greg: main difference between MP and SM is that putting something in shared memory, it will persist; but in message passing, once the message is gone, then it can only exist in private memory.
+DW: I always thought the biggest thing is that there is explicit communication required, i.e.\ send and receive calls have to be made.
+Interesting thing is that the send has to name the destination.
+Biggest difference is that in shared memory, you don't have to name destination.
+DW: Is there an explicit send/receive in shared memory?
+Sam: depends on how complicated your program is.
+DW: suppose you want to compute the sum of a ginormous array, you could segment the array and give each worker a slice of the array, and then send message to a shared resource that would sum everything together.
+
+DW: how is sync done in MP or how in shared memory?
+DW: all messages are some level of sync because you have to send a message before you receive one
+DW: shared memory might enforce some level of ``you can't write to the same memory at the same time''
+DW: some would argue that separating sync from data movement
+
+DW: what if you don't know the destination
+PD: in SM, you can just write it wherever you want
+?: in MP you can send messages based on topic-based distribution
+DW: is it broadcast or multicast
+DW: is everyone going to see the data still?
+?: you can do round-robin, load-balancing, etc.
+DW: someone has to read message in MP, rather than SM
+George: in MP you could have a centralized store for messages
+DW: that gets really inefficient, e.g.\ in \texttt{ntop} you have the count of packets for each flow; the way it works is by acquiring each lock and keeping counts per flow in shared memory and then dump the array.
+If you do this with MP, then you have a central store, but that just becomes a serial program and defeats the point (becomes a bottleneck)
+
+DW: can we implement shared memory with message passing and vice versa
+DD: yes, you could use shared memory as an ``inbox'' by giving each node an address
+DW: also shared memory can be turned into messages by turning loads and stores into send and receive
+
+DW: in 2019, who won out
+PD: shared memory is more popular than message passing
+George: I would argue the other way
+PD: I was thinking within GPUs
+DW: more shared memory because we have phones, computers, etc., that have shared memory; there is a school of thought that says writing programs for a small number of nodes
+George: for HPC, distributed systems, then message passing is more popular
+
+DW: at large scale, we don't see large-scale shared memory in 2019; HPC has embraced message passing, and so at very very very very large scale (i.e.\ over a million cores), which use local shared memory and generally message passing at the larger scale.
+DW: is it inherently true that message passing scales better?
+PD: I don't think so especially, e.g.\ in the linear algebra application which requires data to be shared to everyone at every step; but in the weather codes local message passing is much better.
+DW: in some sense, shared memory is by default sharing with everyone; when you go to try to communicate to someone else with shared memory and you don't know who the reader is, etc., then you might need to track everyone in the entire system keeping that data. Storage gets challenged.
+As far as the communication cost, there is a lot of implicit communication in shared memory.
+To get data from point A to point B, you have to insert data in an address and invalidate everyone's caches.
+
+--------------
+
+R13: A Survey of Cache Coherence
+Written by Per Stenstroem
+
+DW: you should definitely go to Gottenberg because it's not the Toledo of Sweden.
+The campus (Chalmers) and the city is beautiful.
+
+Published in IEEE Computer, which is basically a magazine and is invite-only (would be called as a journal).
+In this discipline, publishing happens a lot in conferences.
+tl;dr this article was a review article that he was asked to write, not a research paper
+
+This paper introduces the nomenclature.
+Next class, we'll read the first cache coherence protocol, and then the Illinois protocol.
+
+DW: what is consistency?
+Sam: your insn has to execute in the correct order (?)
+DW: consistency is a set of rules that govern the order of visibility of shared memory reads and writes between different processors or threads; the one that people like to think about is sequential consistency, which says that every load or store (memory operation) that executes on a given processor executes in order and everyone sees it execute in that order relative to that processor; sequential isn't ``strict'' consistency
+
+[Insert explanation of consistency here]
+
+Coherence: tool that enforces consistency model
+
+DW: did we like this paper
+DD: it was promotional material for his coherence protocol
+Greg: interesting to read, especially if you've never seen this material before
+DW: were people building multiprocessing systems
+Greg: yes they def were
+
+DW: we went from multiprocessor/socket systems to multicore systems (on a single chip), and we just took what we had and implemented it
+Greg: it's a natural thing to do if you have nothing else
+DW: there is an opportunity to implement more clever things, but people already understood the programming model, dual-socket, etc.
+
+DW: this paper classifies difference coherence models into write update (broadcast) [writes are broadcast and update all other cache copies] and write invalidate [writes invalidate all other cache copies]
+
+CAP Consideration: in small systems, everyone has to perform something in a set amount of time; drop everything that you're doing and update the cache; in directory-based systems, you have a bi-directional handshake; there's not a great resilient cache coherence protocol; there is some fault containment, but typically you just end up crashing, etc., some handling of network problems, but if there is a partition, then you go down
+
+
+\end{document}
