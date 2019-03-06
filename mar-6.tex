@@ -1,0 +1,101 @@
+\input{config/document-setup}
+
+\begin{document}
+\lecture{Class Discussion Notes}{March 6, 2019}{Dev Dabke}
+
+\section{Snoopy Protocols}
+
+DW: We think of a snoopy protocol as one that listens to all cache operations in the system.
+
+DW: suppose we don't have caches. What happens when you want to access data? You go to main memory. Is there a coherence issue?
+SH: no coherence issue.
+DW: what is the problem with this?
+High latency and bandwidth of the bus to access memory is limited, so there is a bottleneck.
+
+Write-through vs. write-back
+
+write-back: eventually write to main memory, usually when you eject from cache
+write-through: when you write your local cache, you write through to main memory
+In some consistency models, it's okay that processors don't see an updated value.
+Whether or not a coherence model is correct, depends on the consistency guarantee provided in hardware.
+However, you can have more relaxed consistency models, and perhaps punt to software.
+
+DW: Why are relaxed consistency models not popular in 2019?
+??: it's hard to program
+DW: there's no truth that certain consistency models are better; they're just different and can be useful/preferred in different contexts. It can be an aesthetic question, just based on preferences.
+But, most people would say that preserving some (temporal) order is probably good.
+George: this is not necessarily preferable, but it's not necessarily good that preserving (temporal) order at the hardware.
+DW: there are compilers, etc., that can insert fences that can guarantee some consistency
+George: I would assume that the lazy (or no so strict models) of consistency would be easier to design in terms of hardware.
+DW: there is a widespread disagreement in the comp arch world about this topic. I think it's easier to do weaker consistency, but there are faculty at MIT that claimed it was easier.
+The reason this became important is because there's debate on what consistency model RISC 5 should adopt.
+The memory working group (led by Dan Lustig, who took this class the first time it was offered at Princeton) had a big fight about whether or not RISC 5 should allow weaker consistency models.
+The outcome was a dual path that officially they use weak consistency models, BUT you can elect to implement a total store ordering (TSO), etc., and to make matters worse, the major linux vendors said that they won't ship anything unless they it's TSO.
+A lot of the vendors were okay with weak consistency, especially embedded people because they don't want to deal with this hardware complexity.
+You can also have different instructions (like in SPARC) that have different consistency guarantees.
+By using fences, etc., you can make weaker consistency models (that are correct) by making them stronger, but there are some architectures that hilariously don't have correct implementations of weak consistency.
+DW: personally, I don't think these things matter because there aren't planes falling out the sky; you can just put in fences, etc., and just make it work.
+DW: in some sense, without even explicit consistency model, typically a system has some consistency model, even if it doesn't have name or is particularly strong.
+DW: can we get stale data even with write-through?
+GC: yes, e.g. CPU 1 loads address 5, then CPU writes to address 5, and then CPU 1 does another load, which would still get the old value because it would be in the cache.
+
+---------------------------------------------
+
+What is snooping?
+Suppose that CPU 1 wants to write to memory; it puts out a snoopy message on the bus to let everyone know that it's going to write to memory.
+It's going to broadcast the address it wants to use and the state it wants to get it into it and everyone has to listen to it.
+Because of this, you have to dual-port or time-multiplex the tags on this cache.
+----
+SH: not sure why we need to dual-port?
+DW: look at tag in the cache and we have status bits in the cache.
+Possibly, two bits or something like that.
+If you have the CPU as accessing the cache at the same time that another CPU is broadcasting on the bus, then you need a way to handle both at the same time.
+Therefore, you need to time-multiplex or dual-port the status bits, i.e.\ the tags.
+With time-muxing you could starve out your own access as the system scales with traffic.
+Therefore, you need two full ports.
+----
+So what does this bus look like?
+What do these wires look like?
+Typically you have these wires with read, or intent to read, etc.\ with an address.
+Usually, the address is of a cache block, not a real address.
+Typically, with ``intent to write'' you wait for other people to invalidate, e.g.\ you guarantee that everyone self-updates within n cycles and if nothing happens in n cycles, you are free to proceed.
+The arbitration guarantee of the bus allows for a response time.
+If someone has dirty data, they are the only one who would have it, so you wait for just the one person to respond.
+
+----
+Invalidation vs. update protocols is an orthogonal concern from write-through vs. write-back. While some are more common, you can still have weird things like write-through invalidation protocol.
+=========
+Looking at Per's paper.
+DW: Could you create a cache coherence protocol where you turn a load/store into something else?
+You could have a compiler that transforms loads/stores into more complex code that implements that cache coherence protocol, i.e.\ you put cache coherence in software.
+SH: hardware seems more popular?
+DW: but people do this in software, like Sarita (UIUC). But hardware acceleration helps a lot.
+Her stuff these days also uses hardware acceleration, but the hardware has a weak model, whereas the software model builds a stronger model.
+You could use software to transform loads and stores into messages across some distributed system.
+We see this in Internet-scale applications or data-center-scale applications, e.g.\ memcached where you build a distributed key-value store.
+You could have loads/stores that aren't cacheable, or you just write-through on everything.
+---
+Another way to do this is with page coherence, which is keeping information consistent at the system level, where you could build a coherence protocol with two different connected computers.
+VirtualIron (owned by VMWare now) does this.
+Why doesn't this work? Granularity issue
+Dfn: \textit{false sharing} this idea that if you go to access a piece of data in a cacheline or in a block and it invalidates somebody else and if you have a smaller block size and it would not have invalidated the data, then this is false sharing.
+
+
+=============
+
+Let's look at the midwest papers.
+
+One in UIUC and the other Wisconsin. These people clearly knew about each other.
+Typically Goodman and his student gets credit for snoopy cache coherence.
+Janak Patel is professor at UIUC.
+
+Jim Goodman paper
+Where does snoopy cache coherence show up in this paper?
+Doesn't show up in the first few pages.
+What did Goodman think the main contribution?
+Exploiting temporal locality for reducing bus traffic.
+But Goodman's section 3 is a diamond in the rough; sometimes authors don't even realize the most important thing in their papers.
+PD: Compromise between write-through and write-back as ``write-once'' is main contribution?
+DW: main contribution: introduces the concept of states with the tags
+
+\end{document}
