@@ -15,11 +15,12 @@ DW: anyone want to add things
 Greg: what is componentization
 
 ?: you can develop separate systems as long as message passing interface is agreed upon
-Greg: I would argue with this point and say that you would have to coordinate both the sender and receiver or you could get massive deadlocks
+Greg: I would argue with this point and say that you would have to coordinate both the sender and receiver or you could get massive deadlocks, in message passing you need to communicate how to communicate between different components through handshaking etc., when different people write different parts it can be difficult to communicate. 
 ?: but shared memory also has deadlocks
 
-DW: let's define deadlock is when you a communication pattern such that there is a cycle in the communication graph (aka.\ hold/waits for graph), you have a possibility for deadlock
-DW: how is that different from livelock; in deadlock some portion of the system has stopped, whereas livelock is we're doing work, but not making forward progress. e.g.\ from the real world: you have some protocol where everyone in this room has a card and your job is to gather all the pieces of paper in the room, but your own. Whenever someone asks you for a piece of paper, you have to give it up. As soon as DW says ``go'' everyone is going to start asking, but no one is going to end up winning out; then, you give the piece of paper back. Therefore, you're doing work, but not actually making forward progress.
+DW: let's define deadlock is when you a communication pattern such that there is a cycle in the communication graph (aka.\ hold/waits for graph), you have a possibility for deadlock. Not everything has to stop in deadlock, some portion of computation graph is dead.
+
+DW: how is that different from livelock; in deadlock some portion of the system has stopped, whereas livelock is we're doing work, but not making forward progress. The test and store mechanism can lead to livelocks. e.g.\ from the real world: you have some protocol where everyone in this room has a card and your job is to gather all the pieces of paper in the room, but your own. Whenever someone asks you for a piece of paper, you have to give it up. As soon as DW says ``go'' everyone is going to start asking, but no one is going to end up winning out; then, you give the piece of paper back. Therefore, you're doing work, but not actually making forward progress. 
 
 ??: chose message passing because I agree with (?) because you can make it more componentized, which makes it easier.
 ?: I think the idea is that you operate your own objects, and I don't want anyone else to modify my objects.
@@ -28,7 +29,8 @@ DW: shared memory and message passing are just models, but there are many differ
 Greg: main difference between MP and SM is that putting something in shared memory, it will persist; but in message passing, once the message is gone, then it can only exist in private memory.
 DW: I always thought the biggest thing is that there is explicit communication required, i.e.\ send and receive calls have to be made.
 Interesting thing is that the send has to name the destination.
-Biggest difference is that in shared memory, you don't have to name destination.
+Biggest difference is that in shared memory, you don't have to name destination. Shared memory can be distributed but it has same virtual namespace. You move data in shared memory between processors through loads and stores.
+
 DW: Is there an explicit send/receive in shared memory?
 Sam: depends on how complicated your program is.
 DW: suppose you want to compute the sum of a ginormous array, you could segment the array and give each worker a slice of the array, and then send message to a shared resource that would sum everything together.
@@ -39,7 +41,7 @@ DW: shared memory might enforce some level of ``you can't write to the same memo
 DW: some would argue that separating sync from data movement
 
 DW: what if you don't know the destination
-PD: in SM, you can just write it wherever you want
+PD: in SM, you can just write it wherever you want and not wait for some other processor to pick it up.
 ?: in MP you can send messages based on topic-based distribution
 DW: is it broadcast or multicast
 DW: is everyone going to see the data still?
@@ -47,25 +49,29 @@ DW: is everyone going to see the data still?
 DW: someone has to read message in MP, rather than SM
 George: in MP you could have a centralized store for messages
 DW: that gets really inefficient, e.g.\ in \texttt{ntop} you have the count of packets for each flow; the way it works is by acquiring each lock and keeping counts per flow in shared memory and then dump the array.
-If you do this with MP, then you have a central store, but that just becomes a serial program and defeats the point (becomes a bottleneck)
+If you do this with MP, then you have a central store, but that just becomes a serial program and defeats the point (becomes a bottleneck). If you distribute the table over multiple nodes the communication overhead increases considerably.
 
 DW: can we implement shared memory with message passing and vice versa
 DD: yes, you could use shared memory as an ``inbox'' by giving each node an address
-DW: also shared memory can be turned into messages by turning loads and stores into send and receive
+DW: also shared memory can be turned into messages by turning loads and stores into send and receive, by allocating queues and putting a lock over it which the other processor can then read
 
 DW: in 2019, who won out
 PD: shared memory is more popular than message passing
 George: I would argue the other way
 PD: I was thinking within GPUs
-DW: more shared memory because we have phones, computers, etc., that have shared memory; there is a school of thought that says writing programs for a small number of nodes
+DW: We have more shared memory because we have phones, computers, etc., that have shared memory and a school of thought believes it is easier to use shared memory for a small number of nodes.
 George: for HPC, distributed systems, then message passing is more popular
 
 DW: at large scale, we don't see large-scale shared memory in 2019; HPC has embraced message passing, and so at very very very very large scale (i.e.\ over a million cores), which use local shared memory and generally message passing at the larger scale.
 DW: is it inherently true that message passing scales better?
 PD: I don't think so especially, e.g.\ in the linear algebra application which requires data to be shared to everyone at every step; but in the weather codes local message passing is much better.
-DW: in some sense, shared memory is by default sharing with everyone; when you go to try to communicate to someone else with shared memory and you don't know who the reader is, etc., then you might need to track everyone in the entire system keeping that data. Storage gets challenged.
+DW: At large scale we don’t see machines that have large shared memory, it is possible but difficult to build cache coherence over millions of caches. The supercomputers have over million cores where shared memory for small and mpi for long data movements. Scalability of algorithm is more important than programming model. In some sense, shared memory is by default sharing with everyone; when you go to try to communicate to someone else with shared memory and you don't know who the reader is, etc., then you might need to track everyone in the entire system keeping that data. Storage scaling gets challenging. 
 As far as the communication cost, there is a lot of implicit communication in shared memory.
 To get data from point A to point B, you have to insert data in an address and invalidate everyone's caches.
+
+Processor 1 and 2 with private caches (Write back, write invalidate) connected on bus with memory also on it. If we have to move address 5, processor 1 will pull in cache line write it in its cache. When 2 reads it checks invalidation , then broadcasts and then 1 moves the cache line to 2. You can broadcast or use a directory scheme. With MP it can be done in one message.
+If you are implementing messaging over shared memory extra round trips involved.
+
 
 --------------
 
@@ -86,6 +92,9 @@ DW: what is consistency?
 Sam: your insn has to execute in the correct order (?)
 DW: consistency is a set of rules that govern the order of visibility of shared memory reads and writes between different processors or threads; the one that people like to think about is sequential consistency, which says that every load or store (memory operation) that executes on a given processor executes in order and everyone sees it execute in that order relative to that processor; sequential isn't ``strict'' consistency
 
+Sequential consistency- every memory operation on a given processor executes inorder and is visible to everyone else being inorder. And to be consistent the order must be some interleaving of these inorder instructions which everyone agrees upon. The consistency model in x86 processors, TSO (total store ordering) x86 is weaker where not everyone must see the same order.  
+
+
 [Insert explanation of consistency here]
 
 Coherence: tool that enforces consistency model
@@ -102,7 +111,7 @@ DW: there is an opportunity to implement more clever things, but people already 
 
 DW: this paper classifies difference coherence models into write update (broadcast) [writes are broadcast and update all other cache copies] and write invalidate [writes invalidate all other cache copies]
 
-CAP Consideration: in small systems, everyone has to perform something in a set amount of time; drop everything that you're doing and update the cache; in directory-based systems, you have a bi-directional handshake; there's not a great resilient cache coherence protocol; there is some fault containment, but typically you just end up crashing, etc., some handling of network problems, but if there is a partition, then you go down
+CAP Consideration: in small systems, everyone has to perform something in a set amount of time; drop everything that you're doing and update the cache; in directory-based systems, you have a bi-directional handshake, which is directory-based ; This causes issues in scaling as there's not a great resilient cache coherence protocol; there is some fault containment, but typically you just end up crashing, etc., some handling of network problems, but if there is a partition, then you go down
 
 
 \end{document}
