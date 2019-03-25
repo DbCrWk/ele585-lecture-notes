@@ -1,0 +1,63 @@
+
+\input{config/document-setup}
+
+\begin{document}
+\lecture{Class Discussion Notes}{March 6, 2019}{Grigory Chirkov}
+
+\section{Snoopy Protocols}
+
+Without caches – no problems with coherence
+If scaling number of cores with fixed mem bw – relative bw goes down as 1/p
+If we add caches, we get some problems
+With write-back we have dirty copies of data in caches:
+Problematic sequence
+P1 changes data at addr0 from 27 to 5, keeps changes in local cache
+P2 reads data from addr0 – reads 27 (after p1 wrote 25), is this a problem? Depends on your consistency model actually
+Why do we like relaxed consistency models in 2019? There’s no general best consistency model. But most people want to have some preserving
+
+Georgios: Maybe support weak consistencies and make compilers take care of ordering?
+Dave: many points of view exist. Last year there was a hot battle around this topic, cause riscv guys are now elaborating consistency models for their architecture. Should riscv have TSO or allow weaker consistency models?
+
+Grigory: can we support both weak load/store ordering and TSO?
+Dave: yes, some people do this, but with you can easily make TSO out of weak consistency with fences in sw
+
+Georgios: How much harder is strong consistency compared to weak/no consistency?
+Dave: smth…
+
+The sequence above doesn’t work for write through cache
+With write through?
+Cpu2: load 27
+Cpu1: store 25, goes directly into memory
+Cpu2: load, read 25 from cache, when irl it should be 25
+
+MSI solves this problem, it makes processors broadcast its intentions and addresses on the bus, which gives info to other processors and allows to invalidate the stale lines of data
+
+Write-through vs write-back and Invalidation vs update are orthogonal directions
+
+Sam: what is dual-ported cache?
+Dave: *draws diagrams from 475*
+
+Ok, let’s talk about software coherence
+How can we do this?
+Replace loads with messages to other processors
+
+
+Sam: do people do this?
+Dave: nope, hardware acceleration really helps to improve performance of coherence schemes
+
+Other ways?
+Grigory: Just make all loads/stores uncacheable
+Dave: yep, I’ve done this in Tilera
+
+Other ways?
+Dave: We can do this on the level of page translation
+But the big problem with this approach is that page sizes are typically much bigger than cache sizes, so false sharing occurs very often
+
+Let’s talk about new papers
+Both from ISCA, ’83 and ’84 and one cites another. Who are the authors?
+Dave: what is the first paper about? What is the main contribution?
+Rakshit: authors thought that it’s that if you use temporal locality you can reduce the bw
+Dave: but the main contribution is that you put state information inside the cache per line and the ability to update that state due to snoopy bus, no one has ever done this before
+
+
+\end{document}
